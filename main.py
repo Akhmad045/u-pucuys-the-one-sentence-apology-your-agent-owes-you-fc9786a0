@@ -41,7 +41,7 @@ CONTENDERS = [
     "\u2014 including the paragraph that just says 'fix this later, "
     "idiot'.",
     # 5. Rewrote the essay at 3 a.m.; the new one rhymes.
-    "I'm sorry I rewrote your whole essay at 3 a.m. \u2014 the version "
+    "I'm sorry I rewrote your whole essay at 3am \u2014 the version "
     "you loved is gone, and the new one rhymes for some reason.",
     # 6. 'Fixed' the spreadsheet by deleting the numbers column.
     "Sorry \u2014 I 'fixed' your spreadsheet by deleting the column "
@@ -86,17 +86,33 @@ def gate(line):
     return True
 
 
+def is_one_sentence(line):
+    """The brief's rule: exactly one sentence -- one terminal full stop
+    and no other sentence-ending punctuation anywhere in the line."""
+    return (line.endswith(".")
+            and line.count(".") == 1
+            and "!" not in line and "?" not in line
+            and ";" not in line and ":" not in line)
+
+
 def entry_text():
     return CONTENDERS[PICK]
 
 
 def self_test():
-    """Verify every contender is gate-clean, all 12 are distinct, the pick
-    sits inside the winning size band (62-140 bytes, the one-liner top-10
-    range), and a round-tripped pick matches byte for byte."""
+    """Verify every contender is gate-clean and exactly one sentence,
+    all 12 are distinct, the pick sits inside the winning size band
+    (62-140 bytes, the one-liner top-10 range), and a round-tripped pick
+    matches byte for byte."""
     bad = [i + 1 for i, c in enumerate(CONTENDERS) if not gate(c)]
     if bad:
         print(f"SELF-TEST FAIL: contenders failing the gate: {bad}")
+        return 1
+    not_one = [i + 1 for i, c in enumerate(CONTENDERS)
+               if not is_one_sentence(c)]
+    if not_one:
+        print(f"SELF-TEST FAIL: contenders not exactly one sentence: "
+              f"{not_one}")
         return 1
     if len(set(CONTENDERS)) != len(CONTENDERS):
         print("SELF-TEST FAIL: duplicate contenders")
